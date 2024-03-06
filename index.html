@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>グループチャットアプリ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+
+<div class="box">
+    <div id="title">グループチャット</div>
+    <div id="output" style="display: flex; flex-direction: column; overflow: auto; height: 600px;"></div>
+    <div id="uname-container">
+        <div> 名前：<input type="text" id="uname"> </div>
+    </div>
+    <div>
+        <textarea id="text"></textarea>
+        <button id="send">送信</button>
+    </div>
+</div>
+<!--/ コンテンツ表示画面 -->
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved } 
+    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCflMwrvMd0kGkMtcSEke0C4Xeb4nEtefM",
+      authDomain: "sample-d29be.firebaseapp.com",
+      projectId: "sample-d29be",
+      storageBucket: "sample-d29be.appspot.com",
+      messagingSenderId: "717547095815",
+      appId: "1:717547095815:web:4049eaeaec9ae589c2e7a2"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db,"chat");
+
+    // ページ読み込み時にユーザーネームを入力
+    $(document).ready(function(){
+        const uname = prompt("ユーザーネームを入力してください:");
+        $("#uname").val(uname);
+         // ページ読み込み時にスクロールする
+        scrollChatToBottom();
+    });
+
+    $("#send").on("click",function() {
+        const msg = {
+            uname : $("#uname").val(),
+            text : $("#text").val()
+        }
+        const newPostRef = push(dbRef); //ユニークキーを生成
+        set(newPostRef,msg);
+
+    $("#text").val(''); //送信ボタンを押すとフォームがリセット
+
+    // スクロールする
+    scrollChatToBottom();
+    });
+
+
+    onChildAdded(dbRef, function(data){   
+        const msg  = data.val();
+        const key  = data.key;      //データのユニークキー
+        //表示用テキスト・HTMLを作成
+        let h = '<p class="message';
+        h += msg.uname === $("#uname").val() ? ' own-message">' : ' other-message">';
+        h += '<strong>' + msg.uname + '</strong>';
+        h += '<br>';
+        h += msg.text;
+        h += '</p>';
+        $("#output").append(h);
+        // メッセージが追加されるたびにスクロールする
+        scrollChatToBottom();
+    });
+
+    // 送信時にその分だけスクロールする
+    function scrollChatToBottom() {
+        const chatContainer = $("#output");
+        chatContainer.scrollTop(chatContainer.prop("scrollHeight"));
+    }
+
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
